@@ -13,6 +13,7 @@ const FONT_SIZE = 10;
 const COLORS = {
   bg0: '#29323c',
   bg1: '#1c1c1c',
+  meal: '#FF6663',
 };
 
 
@@ -57,21 +58,21 @@ function createWidget(data) {
   timeFormatter.useNoDateStyle();
   timeFormatter.useShortTimeStyle();
 
-  const lastLoginLine = stack.addText(`Last login: ${timeFormatter.string(new Date())} on console`);
+  const lastLoginLine = stack.addText(`Last check: ${timeFormatter.string(new Date())}`);
   lastLoginLine.textColor = Color.white();
   lastLoginLine.textOpacity = 0.7;
   lastLoginLine.font = new Font(FONT_NAME, FONT_SIZE);
+  
+  // Line 1 - Meal Type and Dining Hall
+	const mealTypeLine = stack.addText(`Commons Dining Hall - ${data.menu.mealType}`);
+  mealTypeLine.textColor = Color.white();
+  mealTypeLine.font = new Font(FONT_NAME, FONT_SIZE);
 
-  // Line 1 - Input
-  const inputLine = stack.addText(data.menu.data.breakfast_menu_items[0][0]);
-  inputLine.textColor = Color.white();
-  inputLine.font = new Font(FONT_NAME, FONT_SIZE);
-
-
-	const menuItems = data.menu.data.breakfast_menu_items[0]
+  // Line 2 - Input
+	const menuItems = data.menu.menu.menu_items[0]
   menuItems.forEach(item => {
     let line = stack.addText(item)
-    line.textColor = Color.white();
+  	line.textColor = new Color(COLORS.meal);
   	line.font = new Font(FONT_NAME, FONT_SIZE);
   })
   
@@ -83,7 +84,7 @@ function createWidget(data) {
  */
 async function fetchData() {
   // Get the weather data
-  const menu = await fetchWeather();
+  const menu = await fetchMenu();
 
 
   // Get last data update time (and set)
@@ -100,21 +101,27 @@ async function fetchData() {
  * Helper Functions
  *****************************************************************************/
 
-//-------------------------------------
-// Weather Helper Functions
-//-------------------------------------
+async function fetchMenu() {
+  const currentTime = new Date().getHours();
+  let mealType;
+  if (currentTime >= 1 && currentTime < 10) {
+    mealType =  "Breakfast";
+  } else if (currentTime >= 10 && currentTime < 16) {
+    mealType =  "Lunch"
+  } else if (currentTime >= 17 && currentTime < 24 ) {
+    mealType =  "Dinner";
+  } else {
+    mealType = "Breakfast";
+  }
 
-/**
- * Fetch the weather data from Open Weather Map
- */
-async function fetchWeather() {
-  const url = "http://api.lucagiannotti.com/commons/breakfast";
-  const data = await fetchJson(url);
+  const url = `http://api.lucagiannotti.com/commons/${mealType.toLocaleLowerCase()}`;
+  const menu = await fetchJson(url);
+  console.log(menu)
 
-  const currentTime = new Date().getTime() / 1000;
 
   return {
-    data,
+    menu,
+    mealType
   }
 }
 
@@ -126,7 +133,6 @@ async function fetchJson(url) {
     console.log(`Fetching url: ${url}`);
     const req = new Request(url);
     const resp = await req.loadJSON();
-    console.log(resp)
     return resp;
 }
 
@@ -143,3 +149,4 @@ async function getLastUpdated() {
 
   return cachedLastUpdated;
 }
+
