@@ -1,15 +1,8 @@
-/******************************************************************************
- * Constants and Configurations
- *****************************************************************************/
-
- // Cache keys and default location
 const CACHE_KEY_LAST_UPDATED = 'last_updated';
  
-// Font name and size
 const FONT_NAME = 'Menlo';
 const FONT_SIZE = 10;
 
-// Colors
 const COLORS = {
   bg0: '#29323c',
   bg1: '#1c1c1c',
@@ -17,26 +10,16 @@ const COLORS = {
 };
 
 
-// Import and setup Cache
 const Cache = importModule('Cache');
 const cache = new Cache('tamuDiningHallMenuFinder');
 
-// Fetch data and create widget
 const data = await fetchData();
 const widget = createWidget(data);
 
 Script.setWidget(widget);
 Script.complete();
 
-/******************************************************************************
- * Main Functions (Widget and Data-Fetching)
- *****************************************************************************/
 
-/**
- * Main widget function.
- * 
- * @param {} data The data for the widget to display
- */
 function createWidget(data) {
   console.log(`Creating widget with data: ${JSON.stringify(data)}`);
 
@@ -68,7 +51,7 @@ function createWidget(data) {
   mealTypeLine.textColor = Color.white();
   mealTypeLine.font = new Font(FONT_NAME, FONT_SIZE);
 
-  // Line 2 - Input
+  // Line 2 - Meals
 	const menuItems = data.menu.menu.menu_items[0]
   menuItems.forEach(item => {
     let line = stack.addText(item)
@@ -79,11 +62,8 @@ function createWidget(data) {
   return widget;
 }
 
-/**
- * Fetch pieces of data for the widget.
- */
+
 async function fetchData() {
-  // Get the weather data
   const menu = await fetchMenu();
 
 
@@ -125,10 +105,6 @@ async function fetchMenu() {
   }
 }
 
-//-------------------------------------
-// Misc. Helper Functions
-//-------------------------------------
-
 async function fetchJson(url) {
     console.log(`Fetching url: ${url}`);
     const req = new Request(url);
@@ -136,9 +112,6 @@ async function fetchJson(url) {
     return resp;
 }
 
-/**
- * Get the last updated timestamp from the Cache.
- */
 async function getLastUpdated() {
   let cachedLastUpdated = await cache.read(CACHE_KEY_LAST_UPDATED);
 
